@@ -250,7 +250,12 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.join(__dirname, "dist")));
-    app.get("/:path*", (req, res) => {
+    
+    // Fallback for SPA: serve index.html for any request that isn't for a static file or an API route
+    app.use((req, res, next) => {
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
