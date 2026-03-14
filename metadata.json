@@ -1,0 +1,5 @@
+{
+  "name": "Calculadora de Custo de Salgados",
+  "description": "Sistema para calcular o custo de produção de salgados baseado em receitas e ingredientes.",
+  "requestFramePermissions": []
+}
