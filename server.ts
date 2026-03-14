@@ -15,6 +15,7 @@ const { Pool } = pg;
 // Supabase Connection String (from .env)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
 async function startServer() {
@@ -25,7 +26,7 @@ async function startServer() {
   // Wait for DB to connect and create tables if they don't exist
   try {
     const client = await pool.connect();
-    console.log("Connected to Supabase successfully!");
+    console.log("Database connection established.");
     client.release();
     await client.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
@@ -48,10 +49,10 @@ async function startServer() {
         quantity REAL NOT NULL
       );
     `);
-    client.release();
-    console.log("Connected to Supabase successfully!");
+    console.log("Database tables verified/created.");
   } catch (err) {
-    console.error("Failed to connect to Supabase: ", err);
+    console.error("Database initialization error:", err);
+    throw err; // Re-throw to be caught by the global handler
   }
 
   // API Routes
@@ -257,4 +258,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error("CRITICAL ERROR DURING SERVER STARTUP:", err);
+  process.exit(1);
+});
