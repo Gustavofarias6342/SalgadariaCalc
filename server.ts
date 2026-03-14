@@ -20,11 +20,13 @@ const pool = new Pool({
 async function startServer() {
   const app = express();
   app.use(express.json());
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   // Wait for DB to connect and create tables if they don't exist
   try {
     const client = await pool.connect();
+    console.log("Connected to Supabase successfully!");
+    client.release();
     await client.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
         id SERIAL PRIMARY KEY,
@@ -250,8 +252,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(Number(PORT), "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
   });
 }
 
