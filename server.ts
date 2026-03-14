@@ -23,9 +23,10 @@ async function startServer() {
   app.use(express.json());
   const PORT = process.env.PORT || 3000;
 
+  let client;
   // Wait for DB to connect and create tables if they don't exist
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
     console.log("Database connection established.");
     await client.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
@@ -51,7 +52,9 @@ async function startServer() {
     console.log("Database tables verified/created.");
   } catch (err) {
     console.error("Database initialization error:", err);
-    throw err; // Re-throw to be caught by the global handler
+    throw err;
+  } finally {
+    if (client) client.release();
   }
 
   // API Routes
@@ -247,7 +250,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.join(__dirname, "dist")));
-    app.get("(.*)", (req, res) => {
+    app.get("/:path*", (req, res) => {
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
