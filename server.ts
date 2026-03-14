@@ -27,7 +27,6 @@ async function startServer() {
   try {
     const client = await pool.connect();
     console.log("Database connection established.");
-    client.release();
     await client.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
         id SERIAL PRIMARY KEY,
@@ -248,7 +247,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static(path.join(__dirname, "dist")));
-    app.get("*", (req, res) => {
+    app.get("(.*)", (req, res) => {
       res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
